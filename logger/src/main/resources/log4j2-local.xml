@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~    Copyright 2021-2022 jinzhaosn
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+<!--Configuration后面的status,这个用于设置log4j2自身内部的信息输出,可以不设置,当设置成trace时,你会看到log4j2内部各种详细输出-->
+<!--monitorInterval：Log4j能够自动检测修改配置 文件和重新配置本身,设置间隔秒数-->
+<configuration status="WARN" monitorInterval="1800">
+
+    <Properties>
+        <!-- 控制台默认输出格式,"%-5level":日志级别,"%l":输出完整的错误位置,是小写的L,因为有行号显示,所以影响日志输出的性能 -->
+        <property name="console_log_pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %l - %m%n</property>
+        <!-- 日志文件默认输出格式,不带行号输出(行号显示会影响日志输出性能);%C:大写,类名;%M:方法名;%m:错误信息;%n:换行 -->
+        <!-- <property name="log_pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %C.%M - %m%n</property> -->
+        <!-- 日志文件默认输出格式,另类带行号输出(对日志输出性能未知);%C:大写,类名;%M:方法名;%L:行号;%m:错误信息;%n:换行 -->
+        <property name="log_pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] %C.%M[%L line] - %m%n</property>
+
+        <!-- 日志默认输出级别 -->
+        <property name="output_log_level">DEBUG</property>
+
+        <!-- ============== 控制台显示控制 ================== -->
+        <!-- 控制台显示的日志最低级别 -->
+        <property name="console_print_level">DEBUG</property>
+
+    </Properties>
+
+    <!--定义appender -->
+    <appenders>
+        <!-- =======================================用来定义输出到控制台的配置======================================= -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 设置控制台只输出level及以上级别的信息(onMatch),其他的直接拒绝(onMismatch)-->
+            <ThresholdFilter level="${console_print_level}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <!-- 设置输出格式,不设置默认为:%m%n -->
+            <PatternLayout pattern="${console_log_pattern}"/>
+        </Console>
+        <!-- ================================打印root中指定的level级别以上的日志到文件================================ -->
+    </appenders>
+
+    <!--定义logger,只有定义了logger并引入的appender,appender才会生效-->
+    <loggers>
+        <!-- 设置打印sql语句配置开始,以下两者配合使用,可以优化日志的输出信息,减少一些不必要信息的输出 -->
+        <!-- 设置java.sql包下的日志只打印DEBUG及以上级别的日志,此设置可以支持sql语句的日志打印 -->
+        <logger name="java.sql" level="DEBUG" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+        <!-- 设置org.mybatis.spring包下的日志只打印WARN及以上级别的日志 -->
+        <logger name="org.mybatis.spring" level="WARN" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+        <!-- 设置org.springframework包下的日志只打印WARN及以上级别的日志 -->
+        <logger name="org.springframework" level="WARN" additivity="false">
+            <appender-ref ref="Console"/>
+        </logger>
+        <!-- 设置打印sql语句配置结束 -->
+
+        <!--建立一个默认的root的logger-->
+        <root level="${output_log_level}">
+            <appender-ref ref="Console"/>
+        </root>
+    </loggers>
+</configuration>

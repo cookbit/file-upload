@@ -1,0 +1,21 @@
+server:
+  port: 9001
+
+spring:
+  profiles:
+    active: @profiles.active@
+  application:
+    name: file-uploader
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/file-upload?useUnicode=true&characterEncoding=UTF-8&autoConnect=true&rewriteBatchedStatements=true
+    username: root
+    password: jinzhaosn123
+
+# 服务名称
+service:
+  position:
+    systemName: File-Uploader-System
+    serviceGroup: File-Uploader
+    serviceName: ${spring.application.name}
+    serverPort: ${server.port}
