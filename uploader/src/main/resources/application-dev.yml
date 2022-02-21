@@ -1,2 +1,9 @@
 logging:
   config: classpath:log4j2-local.xml
+
+## 上传配置
+simple:
+  storage:
+    config:
+      accessUrl: http://127.0.0.1/v1/file/download?fileId=%s
+      basicPath: C:\workspace\storage\
