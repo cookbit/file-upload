@@ -24,7 +24,6 @@ import java.io.BufferedInputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -48,25 +47,109 @@ public class RandomAccessStorage implements Closeable {
     /**
      * 目标文件
      *
-     * @param path 文件路径
+     * @param target 文件路径
+     * @param offset 写入偏移
      * @return this
+     * @throws IOException 目标文件校验失败
      */
-    public static RandomAccessStorage target(String path) throws FileNotFoundException {
+    public static RandomAccessStorage target(File target, int offset) throws IOException {
+        // 检查文件有效性
+        checkFileValidity(target);
+
+        // 初始化
         RandomAccessStorage storage = new RandomAccessStorage();
+        storage.targetFile = new RandomAccessFile(target, "rw");
+        storage.targetFile.seek(offset);
+        storage.totalCount = 0;
+        storage.previousCount = 0;
+        return storage;
+    }
+
+    /**
+     * 目标文件
+     *
+     * @param path   文件路径
+     * @param offset 写入偏移
+     * @return this
+     * @throws IOException 目标文件校验失败
+     */
+    public static RandomAccessStorage target(String path, int offset) throws IOException {
         File file = new File(path);
         if (file.isDirectory()) {
             file = FileUtils.getFile(file, UUID.randomUUID().toString());
         }
+
+        return target(file, offset);
+    }
+
+    /**
+     * 设置目标文件
+     *
+     * @param target 目标文件
+     * @param append 是否是APPEND模式
+     * @return this
+     * @throws IOException 目标文件校验失败
+     */
+    public static RandomAccessStorage target(File target, boolean append) throws IOException {
+        // 检查文件有效性
+        checkFileValidity(target);
+        int offset = append ? (int) target.length() : 0;
+        return target(target, offset);
+    }
+
+    /**
+     * 设置目标文件
+     *
+     * @param target 目标文件，默认覆盖写入模式
+     * @return this
+     * @throws IOException 校验目标文件失败
+     */
+    public static RandomAccessStorage target(File target) throws IOException {
+        return target(target, false);
+    }
+
+    /**
+     * 设置目标文件
+     *
+     * @param path   目标文件路径
+     * @param append 是否APPEND模式
+     * @return this
+     * @throws IOException 目标文件校验失败
+     */
+    public static RandomAccessStorage target(String path, boolean append) throws IOException {
+        return target(new File(path), append);
+    }
+
+    /**
+     * 设置目标文件
+     *
+     * @param path 目标文件，默认覆盖写入模式
+     * @return this
+     * @throws IOException 目标文件校验失败
+     */
+    public static RandomAccessStorage target(String path) throws IOException {
+        return target(path, false);
+    }
+
+    /**
+     * 检查文件的有效性
+     *
+     * @param file File
+     * @throws IOException 文件或文件夹创建IO异常
+     */
+    private static void checkFileValidity(File file) throws IOException {
         File parentFile = file.getParentFile();
         if (!parentFile.exists() && !parentFile.mkdirs()) {
-            throw new FileNotFoundException(String.format("path"));
+            throw new IOException(String.format("path %s parent create fail", parentFile.getCanonicalPath()));
         }
 
-        // 初始化
-        storage.targetFile = new RandomAccessFile(file, "rw");
-        storage.totalCount = 0;
-        storage.previousCount = 0;
-        return storage;
+        if (file.exists() && !file.canWrite()) {
+            throw new IOException(String.format("file %s write access denied", file.getCanonicalPath()));
+        }
+
+        if (!file.exists() && !file.createNewFile()) {
+            throw new IOException(String.format("file %s create failed", file.getCanonicalPath()));
+        }
     }
 
     /**
@@ -89,7 +172,7 @@ public class RandomAccessStorage implements Closeable {
      * @param offset 源数据偏移
      * @param len    拷贝的长度
      * @return this
-     * @throws IOException
+     * @throws IOException 缓存获取数据或者写入拷贝的时候发生异常
      */
     public RandomAccessStorage write(byte[] buffer, int offset, int len) throws IOException {
         targetFile.write(buffer, offset, len);
@@ -149,8 +232,7 @@ public class RandomAccessStorage implements Closeable {
      * @throws IOException 从源文件获取数据或者写入IO异常
      */
     public RandomAccessStorage copyFrom(File source) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(new FileInputStream(source));
-        return copyFrom(bis);
+        return copyFrom(new FileInputStream(source));
     }
 
     /**
