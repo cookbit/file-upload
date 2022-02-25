@@ -161,6 +161,8 @@ public class RandomAccessStorage implements Closeable {
      */
     public RandomAccessStorage write(byte[] buffer) throws IOException {
         targetFile.write(buffer);
+
+        // 记录统计写入的大小
         record(buffer.length);
         return this;
     }
@@ -176,6 +178,8 @@ public class RandomAccessStorage implements Closeable {
      */
     public RandomAccessStorage write(byte[] buffer, int offset, int len) throws IOException {
         targetFile.write(buffer, offset, len);
+
+        // 记录统计写入的大小
         record(len);
         return this;
     }
@@ -185,7 +189,7 @@ public class RandomAccessStorage implements Closeable {
      *
      * @param inputStream 输入数据流
      * @return this
-     * @throws IOException 输入流获取数据或者写入拷贝的时候发生异常
+     * @throws IOException 输入流获取数据或者写入拷贝的时候发生异常，关闭源输入流异常
      */
     public RandomAccessStorage copyFrom(InputStream inputStream) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -196,7 +200,10 @@ public class RandomAccessStorage implements Closeable {
             write(buffer, 0, len);
             count += len;
         }
+        // 记录统计写入的大小
         record(count);
+        // 关闭源输入流
+        inputStream.close();
         return this;
     }
 
@@ -207,7 +214,7 @@ public class RandomAccessStorage implements Closeable {
      * @param offset      输入流偏移
      * @param len         拷贝大小
      * @return this
-     * @throws IOException 从源输入流获取或者写入IO异常
+     * @throws IOException 从源输入流获取或者写入IO异常，关闭源输入流异常
      */
     public RandomAccessStorage copyFrom(InputStream inputStream, int offset, int len) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(inputStream);
@@ -220,7 +227,11 @@ public class RandomAccessStorage implements Closeable {
             targetFile.write(buffer);
             count += 1;
         }
+
+        // 记录统计写入的大小
         record(count);
+        // 关闭输入流
+        inputStream.close();
         return this;
     }
 
@@ -229,7 +240,7 @@ public class RandomAccessStorage implements Closeable {
      *
      * @param source 源文件
      * @return this
-     * @throws IOException 从源文件获取数据或者写入IO异常
+     * @throws IOException 从源文件获取数据或者写入IO异常，关闭源输入流异常
      */
     public RandomAccessStorage copyFrom(File source) throws IOException {
         return copyFrom(new FileInputStream(source));
@@ -242,7 +253,7 @@ public class RandomAccessStorage implements Closeable {
      * @param offset     输入文件偏移
      * @param len        拷贝数据大小
      * @return this
-     * @throws IOException 从源数据获取文件或者写入文件IO异常
+     * @throws IOException 从源数据获取文件或者写入文件IO异常，关闭源输入异常
      */
     public RandomAccessStorage copyFrom(File sourceFile, int offset, int len) throws IOException {
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
@@ -254,7 +265,10 @@ public class RandomAccessStorage implements Closeable {
             write(buffer, 0, read);
         }
 
+        // 记录统计写入的大小
         record(count);
+        // 关闭输入文件
+        source.close();
         return this;
     }
 
@@ -263,7 +277,7 @@ public class RandomAccessStorage implements Closeable {
      *
      * @param path 输入文件path
      * @return this
-     * @throws IOException 从Path获取文件或者写入拷贝数据IO异常
+     * @throws IOException 从Path获取文件或者写入拷贝数据IO异常，关闭源输入异常
      */
     public RandomAccessStorage copyFrom(String path) throws IOException {
         File file = new File(path);
@@ -280,7 +294,7 @@ public class RandomAccessStorage implements Closeable {
      * @param offset 源文件offset偏移
      * @param len    拷贝的大小
      * @return this
-     * @throws IOException 在访问源文件或者写入数据时，发生IO异常
+     * @throws IOException 在访问源文件或者写入数据时，发生IO异常，关闭源输入异常
      */
     public RandomAccessStorage copyFrom(String path, int offset, int len) throws IOException {
         File file = new File(path);

@@ -40,7 +40,8 @@ public class RandomAccessStorageTest {
     public void copyFromPathTest() {
         logger.info("copy from path test");
         long start = System.currentTimeMillis();
-        try (RandomAccessStorage storage = RandomAccessStorage.target(destPath).copyFrom(sourcePath)) {
+        try (RandomAccessStorage storage = RandomAccessStorage.target(destPath, true)
+                .copyFrom(sourcePath)) {
         } catch (Exception exp) {
             logger.error("storage exception: [{}]", exp.getMessage());
         }
