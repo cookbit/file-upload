@@ -16,7 +16,6 @@
 
 package com.github.cookbit.service;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import static com.github.cookbit.util.CheckUtil.checkArgument;
 
@@ -167,6 +165,7 @@ public class RandomAccessStorage implements Closeable {
      * @throws IOException 定位位置IO异常
      */
     public void seek(int position) throws IOException {
+        checkArgument(position >= 0, "position must >= 0");
         targetFile.seek(position);
     }
 
@@ -177,6 +176,7 @@ public class RandomAccessStorage implements Closeable {
      * @throws IOException 设置长度IO异常
      */
     public void setLength(int newLength) throws IOException {
+        checkArgument(newLength >= 0, "length must >= 0");
         targetFile.setLength(newLength);
     }
 
@@ -185,8 +185,8 @@ public class RandomAccessStorage implements Closeable {
      *
      * @throws IOException 获取长度IO异常
      */
-    public void getLength() throws IOException {
-        targetFile.length();
+    public int getLength() throws IOException {
+        return (int) targetFile.length();
     }
 
     /**
@@ -329,19 +329,19 @@ public class RandomAccessStorage implements Closeable {
         RandomAccessFile source = new RandomAccessFile(sourceFile, "r");
         source.seek(sfOffset);
         int read = 0; // 读取的大小
-        int leftWrite = len; // 剩余需要写入的大小
+        int remaining = len; // 剩余需要写入的大小
         byte[] buffer = new byte[1024];
         while ((read = source.read(buffer, 0, buffer.length)) != -1) {
-            int writeNum = Math.min(read, leftWrite);
+            int writeNum = Math.min(read, remaining);
             targetFile.write(buffer, 0, writeNum);
-            leftWrite -= writeNum;
-            if (leftWrite <= 0) {
+            remaining -= writeNum;
+            if (remaining <= 0) {
                 break;
             }
         }
 
         // 记录统计写入的大小
-        record(len - leftWrite);
+        record(len - remaining);
         // 关闭输入文件
         source.close();
         return this;
