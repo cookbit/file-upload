@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package com.github.cookbit;
+package com.github.cookbit.service;
 
-import com.github.cookbit.service.RandomAccessStorage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
