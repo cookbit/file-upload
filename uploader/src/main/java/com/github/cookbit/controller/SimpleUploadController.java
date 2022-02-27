@@ -38,7 +38,7 @@ import java.util.List;
  * @date 2022年02月21日
  */
 @RestController
-@RequestMapping("/v1/upload/")
+@RequestMapping("/v1/simpleUpload/")
 public class SimpleUploadController {
     private static final Logger logger = LoggerFactory.getLogger(SimpleUploadController.class);
     @Autowired SimpleUploadService uploadService;
