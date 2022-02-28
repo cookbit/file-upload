@@ -16,6 +16,7 @@
 
 package com.github.cookbit.service;
 
+import com.github.cookbit.storage.local.MappedBufferStorage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

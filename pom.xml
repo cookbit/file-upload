@@ -37,6 +37,8 @@
         <spring.boot.amqp.version>2.6.2</spring.boot.amqp.version>
         <ehcache.version>3.8.1</ehcache.version>
         <fastjson.version>1.2.79</fastjson.version>
+        <minio.version>8.3.7</minio.version>
+        <commons.pool2.version>2.11.1</commons.pool2.version>
     </properties>
 
     <dependencyManagement>
@@ -128,6 +130,11 @@
                 <artifactId>commons-codec</artifactId>
                 <version>${apache.commons.codec.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${commons.pool2.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.mapstruct</groupId>
@@ -164,6 +171,13 @@
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>${fastjson.version}</version>
+            </dependency>
+
+            <!-- minio -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
